@@ -15,20 +15,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Execute deployment command
-        uses: appleboy/ssh-action@v0.1.3
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          GIT_URL: ${{ secrets.GIT_URL }}
-          APP_PATH_PROD: ${{ secrets.APP_PATH_PROD }}
-          APP_TAG: ${{ github.event.release.tag_name }}
-    
+      - name: Test SSH connection
+        uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_HOST_PROD }}
           username: ${{ secrets.SSH_USER_NAME_PROD }}
           key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
-          envs: APP_PATH_PROD, APP_TAG, GIT_URL, DOCKERHUB_USERNAME, DOCKERHUB_TOKEN
+          debug: true
+          script: |
+            ssh-keyscan ${{ secrets.SSH_HOST_PROD }} >> ~/.ssh/known_hosts
+            ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER_NAME_PROD }}@${{ secrets.SSH_HOST_PROD }} "echo 'SSH connection successful'"
+
+      - name: Execute deployment command
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.SSH_HOST_PROD }}
+          username: ${{ secrets.SSH_USER_NAME_PROD }}
+          key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
+          debug: true
           script: |
             sudo docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
 
@@ -38,7 +42,7 @@ jobs:
               git stash
               git pull --rebase
             else
-              ssh-keyscan github.com > ~/.ssh/known_hosts
+              ssh-keyscan github.com >> ~/.ssh/known_hosts
               git clone $GIT_URL /home/ubuntu/$APP_PATH_PROD
               cd /home/ubuntu/$APP_PATH_PROD
             fi

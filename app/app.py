@@ -1,59 +1,27 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import mysql.connector
+from flask_sqlalchemy import SQLAlchemy
 import os
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-def get_db_connection():
-    return mysql.connector.connect(
-        host=os.environ["DB_HOST"],
-        port=os.environ["DB_PORT"],
-        database=os.environ["DB_NAME"],
-        user=os.environ["DB_USER"],
-        password=os.environ["DB_PASSWORD"]
-    )
+MYSQL_USER = os.environ.get('DB_USER')
+MYSQL_PASSWORD = os.environ.get('DB_PASSWORD')
+MYSQL_DB = os.environ.get('DB_NAME')
+MYSQL_HOST = os.environ.get('DB_HOST')
+MYSQL_PORT = os.environ.get('DB_PORT')
 
-def create_user_table():
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            username VARCHAR(25) NOT NULL UNIQUE,
-            password VARCHAR(12) NOT NULL
-        );
-    """)
-    conn.commit()
-    cursor.close()
-    conn.close()
+app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DB}"
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-def create_user(username, password):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        query = f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')"
-        cursor.execute(query)
-        conn.commit()
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-    finally:
-        cursor.close()
-        conn.close()
+db = SQLAlchemy(app)
 
-def get_user(username):
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        query = f"SELECT * FROM users WHERE username = '{username}'"
-        cursor.execute(query)
-        user = cursor.fetchone()
-        return user
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-    finally:
-        cursor.close()
-        conn.close()
+class users(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    password = db.Column(db.String(50), nullable=False)
+
+
 @app.route('/')
 def index():
     if 'username' in session:
@@ -65,7 +33,13 @@ def signup():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        create_user(username, password)
+        user = users(username=username, password=password)
+        try:
+            db.session.add(user)
+            db.session.commit()
+        except:
+            db.session.rollback()
+            return "Error: Username already exists"
         return redirect(url_for('login'))
     return render_template('signup.html')
 
@@ -74,9 +48,9 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        user = get_user(username)
+        user = users.query.filter_by(username=username).first()
         
-        if user and user[2] == password:
+        if user and user.password == password:
             session['username'] = username
             return redirect(url_for('index'))
         else:
@@ -89,5 +63,4 @@ def logout():
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
-    create_user_table()
     app.run(host="0.0.0.0", debug=True)

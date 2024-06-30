@@ -15,24 +15,25 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY_ED25519 }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan ${{ secrets.SSH_HOST_PROD }} >> ~/.ssh/known_hosts
+        shell: bash
+
       - name: Test SSH connection
-        uses: appleboy/ssh-action@v0.1.8
-        with:
-          host: ${{ secrets.SSH_HOST_PROD }}
-          username: ${{ secrets.SSH_USER_NAME_PROD }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
-          debug: true
-          script: |
-            ssh-keyscan ${{ secrets.SSH_HOST_PROD }} >> ~/.ssh/known_hosts
-            ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER_NAME_PROD }}@${{ secrets.SSH_HOST_PROD }} "echo 'SSH connection successful'"
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -o StrictHostKeyChecking=no ${{ secrets.SSH_USER_NAME_PROD }}@${{ secrets.SSH_HOST_PROD }} "echo 'SSH connection successful'"
+        shell: bash
 
       - name: Execute deployment command
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.SSH_HOST_PROD }}
           username: ${{ secrets.SSH_USER_NAME_PROD }}
-          key: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
-          debug: true
+          key: ${{ secrets.SSH_PRIVATE_KEY_ED25519 }}
           script: |
             sudo docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_TOKEN
 

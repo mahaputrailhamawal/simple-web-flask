@@ -1,5 +1,21 @@
 version: "3"
 services:
+  app-prod:
+    image: ${APP_IMAGE}:${APP_TAG}
+    container_name: app-prod
+    ports:
+      - 5001:5000
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_NAME=mydatabase
+      - DB_USER=myuser
+      - DB_PASSWORD=mypassword
+    networks:
+      - my-network
+      
   app:
     build:
       context: ./app

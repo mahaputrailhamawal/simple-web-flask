@@ -1,8 +1,10 @@
+# Base image
 FROM python:3.10-alpine
 
 # Install poetry
 RUN pip install poetry
 
+# Set working directory
 WORKDIR /app
 
 # Copy dependency files
@@ -18,6 +20,7 @@ COPY . /app/
 # Install project with poetry
 RUN poetry install --no-interaction --no-ansi
 
+# Expose port
 EXPOSE 5000
 
 # Use direct command instead of poetry run

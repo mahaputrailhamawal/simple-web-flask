@@ -1,5 +1,5 @@
 # Base image
-FROM python:3.10-alpine
+FROM python:3.10-alpine AS build
 
 # Install poetry
 RUN pip install poetry
@@ -20,8 +20,20 @@ COPY . /app/
 # Install project with poetry
 RUN poetry install --no-interaction --no-ansi
 
+FROM gcr.io/distroless/python3-debian11
+
+# Set working directory in the new stage
+WORKDIR /app
+
+# Copy not just the app directory but also python packages
+COPY --from=build /usr/local/lib/python3.10/site-packages/ /usr/local/lib/python3.10/site-packages/
+COPY --from=build /app /app
+
 # Expose port
 EXPOSE 5000
 
+# Set Python path to ensure packages are found
+ENV PYTHONPATH=/usr/local/lib/python3.10/site-packages
+
 # Use direct command instead of poetry run
-CMD ["python", "app.py"]
+ENTRYPOINT ["python", "/app/app.py"]

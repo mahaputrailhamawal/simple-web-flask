@@ -61,8 +61,6 @@ jobs:
         run: |
           # Debug: Show current directory and structure
           echo "Current directory: $(pwd)"
-          echo "Directory contents:"
-          ls -la
           # Run Snyk test on the app directory
           cd app && snyk test --skip-unresolved --json > ../snyk-results.json || true
           echo "Snyk report created"

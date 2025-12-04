@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Bandit scan
         run: |
-          bandit -r app/ -f json -o bandit-results.json
+          bandit -r simple-web-flask/app/ -f json -o bandit-results.json
           echo "✅ Bandit scan complete"
 
       - name: Upload Bandit Report to DefectDojo

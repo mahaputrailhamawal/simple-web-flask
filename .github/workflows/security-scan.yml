@@ -64,7 +64,7 @@ jobs:
           echo "Directory contents:"
           ls -la
           # Run Snyk test on the app directory
-          cd app && snyk test --skip-unresolved --json > ../../snyk-results.json || true
+          cd app && snyk test --skip-unresolved --json > ../snyk-results.json || true
           # Verify results file was created
           cd ../.. && ls -lh snyk-results.json
 

@@ -36,18 +36,32 @@ jobs:
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
           ENGAGEMENT_ID: ${{ secrets.DEFECTDOJO_ENGAGEMENT_ID }}
         run: |
-          curl -X POST "${DD_URL}/api/v2/import-scan/" \
+          echo "Uploading to DefectDojo..."
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${DD_URL}/api/v2/import-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -F "file=@bandit-results.json" \
             -F "scan_type=Bandit Scan" \
-            -F "product=1" \
             -F "engagement=${ENGAGEMENT_ID}" \
             -F "verified=false" \
-            -F "active=true" \
+            -F "active=false" \
             -F "minimum_severity=Low" \
             -F "scan_date=$(date +%Y-%m-%d)" \
             -F "lead=1" \
-            -F "environment=Production"
+            -F "environment=Production")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+          BODY=$(echo "$RESPONSE" | sed '$d')
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" = "201" ] || [ "$HTTP_CODE" = "200" ]; then
+            echo "✅ Successfully uploaded to DefectDojo"
+          else
+            echo "❌ Upload failed with status $HTTP_CODE"
+            echo "$BODY"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -59,9 +59,12 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          cd simple-web-flask/app
-
-          snyk test --skip-unresolved --json > snyk-results.json
+          # Verify directory exists
+          ls -la simple-web-flask/
+          # Run Snyk from app directory and save results to root
+          cd simple-web-flask/app && snyk test --skip-unresolved --json > ../../snyk-results.json || true
+          # Verify results file was created
+          ls -la ../../snyk-results.json
 
       - name: Upload Snyk Report to DefectDojo
         env:

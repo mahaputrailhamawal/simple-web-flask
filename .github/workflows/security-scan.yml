@@ -59,10 +59,16 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          echo "📦 Running Snyk SCA scan..."
-          cd app && snyk test --skip-unresolved --json > ../snyk-results.json || true
-          cd .. && ls -lh snyk-results.json
-          echo "✅ Snyk scan complete"
+          # Debug: Show current directory and structure
+          echo "Current directory: $(pwd)"
+          echo "Directory contents:"
+          ls -la
+          echo "Looking for Python files:"
+          find . -name "requirements.txt" -o -name "poetry.lock" 2>/dev/null | head -5
+          # Run Snyk test on the app directory
+          cd simple-web-flask/app && snyk test --skip-unresolved --json > ../../snyk-results.json || true
+          # Verify results file was created
+          cd ../.. && ls -lh snyk-results.json
 
       - name: Upload Snyk Report to DefectDojo
         env:

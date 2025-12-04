@@ -40,9 +40,9 @@ jobs:
             -H "Authorization: Token ${DD_TOKEN}" \
             -F "file=@bandit-results.json" \
             -F "scan_type=Bandit Scan" \
+            -F "product_name=Trial-Tests" \
             -F "engagement=${ENGAGEMENT_ID}" \
-            -F "verified=false" \
-            -F "active=false" \
+            -F "active=true" \
             -F "minimum_severity=Low" \
             -F "scan_date=$(date +%Y-%m-%d)" \
             -F "lead=1" \

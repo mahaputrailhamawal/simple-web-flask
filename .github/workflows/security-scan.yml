@@ -66,7 +66,7 @@ jobs:
           echo "Looking for Python files:"
           find . -name "requirements.txt" -o -name "poetry.lock" 2>/dev/null | head -5
           # Run Snyk test on the app directory
-          cd simple-web-flask/app && snyk test --skip-unresolved --json > ../../snyk-results.json || true
+          cd app && snyk test --skip-unresolved --json > ../../snyk-results.json || true
           # Verify results file was created
           cd ../.. && ls -lh snyk-results.json
 

@@ -27,7 +27,7 @@ jobs:
 
       - name: Run Bandit scan
         run: |
-          bandit -r simple-web-flask/app/ -f json -o bandit-results.json
+          bandit -r app/ -f json -o bandit-results.json
           echo "✅ Bandit scan complete"
 
       - name: Upload Bandit Report to DefectDojo
@@ -59,12 +59,10 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          # Verify directory exists
-          ls -la simple-web-flask/
-          # Run Snyk from app directory and save results to root
-          cd simple-web-flask/app && snyk test --skip-unresolved --json > ../../snyk-results.json || true
-          # Verify results file was created
-          ls -la ../../snyk-results.json
+          echo "📦 Running Snyk SCA scan..."
+          cd app && snyk test --skip-unresolved --json > ../snyk-results.json || true
+          cd .. && ls -lh snyk-results.json
+          echo "✅ Snyk scan complete"
 
       - name: Upload Snyk Report to DefectDojo
         env:

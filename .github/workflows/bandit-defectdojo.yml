@@ -41,7 +41,7 @@ jobs:
             -F "file=@bandit-results.json" \
             -F "scan_type=Bandit Scan" \
             -F "product_name=Trial-Tests" \
-            -F "engagement=${ENGAGEMENT_ID}" \
+            -F "engagement_name=Bandit-Scan" \
             -F "active=true" \
             -F "minimum_severity=Low" \
             -F "scan_date=$(date +%Y-%m-%d)" \

@@ -155,11 +155,10 @@ jobs:
             -H "Authorization: Token ${DD_TOKEN}" \
             -F "file=@bandit-results.json" \
             -F "scan_type=Bandit Scan" \
-            -F "engagement=${DD_ENGAGEMENT_BANDIT}" \
-            -F "verified=false" \
+            -F "product_name=Trial-Tests" \
+            -F "engagement_name=Bandit-Scan" \
             -F "active=true" \
             -F "minimum_severity=Low" \
-            -F "scan_date=$(date +%Y-%m-%d)" \
             -F "lead=1" \
             -F "environment=${{ github.ref_name }}" \
             -F "build_id=${{ github.run_id }}" \
@@ -186,11 +185,10 @@ jobs:
             -H "Authorization: Token ${DD_TOKEN}" \
             -F "file=@snyk-results.json" \
             -F "scan_type=Snyk Code Scan" \
-            -F "engagement=${DD_ENGAGEMENT_SNYK}" \
-            -F "verified=false" \
+            -F "product_name=Trial-Tests" \
+            -F "engagement_name=Snyk-Scan" \
             -F "active=true" \
             -F "minimum_severity=Low" \
-            -F "scan_date=$(date +%Y-%m-%d)" \
             -F "lead=1" \
             -F "environment=${{ github.ref_name }}" \
             -F "build_id=${{ github.run_id }}" \

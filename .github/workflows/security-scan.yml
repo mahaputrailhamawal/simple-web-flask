@@ -74,6 +74,8 @@ jobs:
           DD_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
           ENGAGEMENT_ID: ${{ secrets.DEFECTDOJO_ENGAGEMENT_ID }}
         run: |
+          echo "Current directory: $(pwd)"
+          ls -la 
           curl -X POST "${DD_URL}/api/v2/import-scan/" \
             -H "Authorization: Token ${DD_TOKEN}" \
             -F "file=@snyk-results.json" \

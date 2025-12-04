@@ -44,7 +44,6 @@ jobs:
             -F "engagement_name=Bandit-Scan" \
             -F "active=true" \
             -F "minimum_severity=Low" \
-            -F "scan_date=$(date +%Y-%m-%d)" \
             -F "lead=1" \
             -F "environment=Production"
 
